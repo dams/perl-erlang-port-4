@@ -1,0 +1,53 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.73.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 0f2c1083e98dbe4988afabbed8405303a93f117a Changes
+SHA1 0a38f520b86bb3a353ce8ffae90de581e41c220a MANIFEST
+SHA1 4f2eb098c650435f88590d9c4fffede9f4b3c168 META.yml
+SHA1 eb1eb0c848bf3d75e10ef30002af4422d46b11c5 Makefile.PL
+SHA1 c36223bcae3f46c961f44739fa34e76cc1edf118 README
+SHA1 3a6921aa79b512e1c47b9cb10ba2ea689aa610d6 example/perleval.beam
+SHA1 07199ec72b6bc820a26189ee0fad6691e6db59e8 example/perleval.erl
+SHA1 68ca96bcbf84f4fd732a05cd257e4e4ed6a85dd2 example/perleval.pl
+SHA1 9a4e68f660f0f8b645764d0f4c3a0f8a1782284d example/perlport.beam
+SHA1 3deb16251e536330ef5945e26902a1b2d23e326a example/perlport.erl
+SHA1 0fe23dae644c20d020b40c2d2eb6d37f85374848 example/perlre.beam
+SHA1 bf980636a262561d4a94ec7e4e2767c4bb484226 example/perlre.erl
+SHA1 286613b72527479c30dd7d751e747fd8ac51c8f8 example/perlre.pl
+SHA1 3aca1cdbbdc13088fd636531f0d885560b64cd61 inc/ExtUtils/MY_Metafile.pm
+SHA1 10f0a736ca2ffded64599646f331f47d8da2cb8f lib/Erlang/Port4.pm
+SHA1 c0dc9ccd75574c46310897d46edea3a484add320 t/00-load.t
+SHA1 2d71bf43586b58db95f5cd0c930443cff5b6eb8b t/97_podspell.t
+SHA1 6cfb6ca18f19d0c8b945085c791d5fc9387b969a t/boilerplate.t
+SHA1 6da39b48ce64b584e4c3274bff96fc76ff484820 t/pod-coverage.t
+SHA1 0190346d7072d458c8a10a45c19f86db641dcc48 t/pod.t
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJUcEK2AAoJEOKqr8uBrQrUUfYP/1Aoso/o2TY03tV8oXdBPD5n
+A9ruober+a+apCSav9OWWH6WmXyluAKjv8jKZYZzX0Jjdqi7f/8Cs+0ViGQwf1Jn
+8LBBDKtwMHOzWBBOR45iH6/dUP3ImBYMMPREJ5mS7EK5T4jG47v7pIR5KshC/Y5S
+hBfsWS+kPNctXdNups/b9WONsQ32qvbWSoNiFY1gSB8kvOv+SwlEy1XR5PUEbgPT
+Y9CHq29lCoyRYxFhKpPHFNBjienpRsY77o2xWTdrmlmQT6tQSXMjcomJ2I8Q4w6o
+GEUe9phHSF6QAr4XIOsGb4g95NnTmlTHEVHdjfBkI9DwPUQNHGwEEQqCSlq1RZ5F
+UW+oEmEJE6NzkBQMTYpjmRdE3Gn7S/u/h7k20AaYk4yeOJkTrmkoLLPPBkLxSL7H
+q+1638EH/8mG08Cgji3aGqnHwLLLPYdTC0GC3fC8if6NeWN/7Fwlc4aCbxIPvZDk
+Rs5D+vMYloWx1Ho+RbFxtmQo421+oTGzbqVw/nkNZjgBBLYmKZS6d6uwPnIiymba
+kMbD1SPvXuFCUrBt+8pqhCuTyC/r5Rp6b50L7RUhb2r/jbWgcZpSAqWk0yrYyQY6
+VBnL8HinRbyMUMaPy978bfJv9oTc08M2TmBjcCO3q9K2YTmFPTIxdsO/1OW6UAEi
+GwA3+pTSql96u13qUrKk
+=xzO1
+-----END PGP SIGNATURE-----
