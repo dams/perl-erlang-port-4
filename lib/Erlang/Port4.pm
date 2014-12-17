@@ -154,81 +154,98 @@ sub decode
 	my $out = $this->{log};
 	
 	my $data = shift;
+	my $dataSz = length($data);
+	my $offset = 0;
+
 	$out and print $out "decode...\n";
-	if( $data !~ s/^$VERSION_MAGIC// )
+	if( substr($data, 0, 1) ne $VERSION_MAGIC )
 	{
 		$out and print $out "no magic.\r\n";
 		return;
 	}
+	$offset = 1;
+
 	my @stack = ([]);
 	my @pop = (0);
-	while($data ne '')
-	{
-		if( $data =~ s/^$NIL_EXT// )
-		{
+
+	my $SkipData = sub { $offset += $_[0]; };
+	my $GetData = sub {
+		my $sz = shift or return '';
+		my $ret = substr($data, $offset, $sz);
+		$offset += $sz;
+		$ret;
+	};
+	my $GetCurData = sub { substr($data, $offset, $_[0]); };
+
+	my $decode = {
+		$NIL_EXT, sub {
 			push(@{$stack[-1]}, []);
-		}elsif( $data =~ s/^$SMALL_INTEGER_EXT(.)//s )
-		{
-			push(@{$stack[-1]}, unpack("C",$1));
-		}elsif( $data =~ s/^$INTEGER_EXT(.{4})//s )
-		{
-			push(@{$stack[-1]}, unpack("N",$1));
-		}elsif( $data =~ s/^$FLOAT_EXT//s )
-		{
-			my $s = substr($data, 0, 31, '');
+		},
+		$SMALL_INTEGER_EXT, sub {
+			push(@{$stack[-1]}, unpack("C",$GetData->(1)));
+		},
+		$INTEGER_EXT, sub {
+			push(@{$stack[-1]}, unpack("N",$GetData->(4)));
+		},
+		$FLOAT_EXT, sub {
+			my $s = $GetData->(31);
 			$s =~ tr/\0//d;
 			push(@{$stack[-1]}, $s);
-		}elsif( $data =~ s/^$STRING_EXT(.{2})//s )
-		{
-			my $len = unpack("n",$1);
-			my $str = substr($data, 0, $len, '');
-			push(@{$stack[-1]}, $str);
-		}elsif( $data =~ s/^$ATOM_EXT(.{2})//s )
-		{
-			my $len = unpack("n",$1);
-			my $atom = $this->_newAtom(substr($data, 0, $len, ''));
-			push(@{$stack[-1]}, $atom);
-		}elsif( $data =~ s/^$BINARY_EXT(.{4})//s )
-		{
-			my $len = unpack("N",$1);
-			my $binary = $this->_newBinary(substr($data, 0, $len, ''));
-			push(@{$stack[-1]}, $binary);
-		}elsif( $data =~ s/^$LIST_EXT(.{4})//s )
-		{
-			my $len = unpack("N",$1);
+		},
+		$STRING_EXT, sub {
+			push(@{$stack[-1]}, $GetData->(unpack("n",$GetData->(2))));
+		},
+		$ATOM_EXT, sub {
+			push(@{$stack[-1]}, $this->_newAtom($GetData->(unpack("n",$GetData->(2)))));
+		},
+		$BINARY_EXT, sub {
+			push(@{$stack[-1]}, $this->_newBinary($GetData->(unpack("N",$GetData->(4)))));
+		},
+		$LIST_EXT, sub {
+			my $len = unpack("N",$GetData->(4));
 			my $next = [];
 			push(@{$stack[-1]}, $next);
 			push(@stack, $next);
 			push(@pop, $len);
-			next;
-		}elsif( $data =~ s/^$SMALL_TUPLE_EXT(.)//s )
-		{
-			my $len = unpack("C",$1);
+			#next
+		},
+		$SMALL_TUPLE_EXT, sub {
+			my $len = unpack("C",$GetData->(1));
 			my $next = $this->_newTuple([]);
 			push(@{$stack[-1]}, $next);
 			push(@stack, $next);
 			push(@pop, $len);
-			next;
-		}elsif( $data =~ s/^$LARGE_TUPLE_EXT(....)//s )
-		{
-			my $len = unpack("N",$1);
+			#next;
+		},
+		$LARGE_TUPLE_EXT, sub {
+			my $len = unpack("N",$GetData->(4));
 			my $next = $this->_newTuple([]);
 			push(@{$stack[-1]}, $next);
 			push(@stack, $next);
 			push(@pop, $len);
-			next;
-		}elsif( $data =~ s/^$PID_EXT//s )
-		{
-			my $atom_mark = substr($data, 0, 1, '');
-			my $atom_len = unpack("n", substr($data, 0, 2, '')) || 0;
-			my $atom     = substr($data, 0, $atom_len, '') || 0;
-			my $pid      = unpack("N", substr($data, 0, 4, '')) || 0;
-			my $serial   = unpack("N", substr($data, 0, 4, '')) || 0;
-			my $creation = unpack("C", substr($data, 0, 1, '')) || 0;
+			#next;
+		},
+		$PID_EXT, sub {
+			my $atom_mark = $GetData->(1);
+			my $atom_len = unpack("n", $GetData->(2)) || 0;
+			my $atom     = $GetData->($atom_len) || 0;
+			my $pid      = unpack("N", $GetData->(4)) || 0;
+			my $serial   = unpack("N", $GetData->(4)) || 0;
+			my $creation = unpack("C", $GetData->(1)) || 0;
 			my $obj = $this->_newPid([$atom, $pid, $serial, $creation]);
 			push(@{$stack[-1]}, $obj);
-		}else
-		{
+		},
+	};
+	my %decode_skip_pop = ($LIST_EXT,1, $SMALL_TUPLE_EXT,1, $LARGE_TUPLE_EXT,1);
+
+	while($offset < $dataSz)
+	{
+		my $opcode = $GetData->(1);
+		my $code = $decode->{$opcode};
+		if ($code) {
+			$code->();
+			next if exists $decode_skip_pop{$opcode};
+		} else {
 			#$REFERENCE_EXT     = 'e';
 			#$NEW_REFERENCE_EXT = 'r';
 			#$BIT_BINARY_EXT    = 'M';
@@ -240,19 +257,18 @@ sub decode
 			#$NEW_CACHE         = 'N';
 			#$CACHED_ATOM       = 'C';
 			#$COMPRESSED        = 'P';
-			my $id = substr($data,0,1);
-			my $chr = unpack("C",$id);
-			$out and print $out "not ready $id ($chr).\r\n";
+			my $chr = unpack("C",$opcode);
+			$out and print $out "not ready $opcode ($chr).\r\n";
 			last;
 		}
 		while( --$pop[-1]==0 )
 		{
 			pop @pop;
 			pop @stack;
-			if( !UNIVERSAL::isa($data, 'Erlang::Tuple') )
+			if( !UNIVERSAL::isa($GetCurData->(), 'Erlang::Tuple') )
 			{
 				# List.
-				$data =~ s/^$NIL_EXT//;
+				$SkipData->(1) if $GetCurData->(1) eq $NIL_EXT;
 				my $list = $stack[-1]->[-1];
 				my $hash = {};
 				foreach my $item (@$list)
