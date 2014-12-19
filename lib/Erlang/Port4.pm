@@ -175,7 +175,7 @@ sub decode
 		$offset += $sz;
 		$ret;
 	};
-	my $GetCurData = sub { substr($data, $offset, $_[0]); };
+	my $GetCurData = sub { substr($data, $offset, $_[0] || 0); };
 
 	my $decode = {
 		$NIL_EXT, sub {
