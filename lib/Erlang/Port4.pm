@@ -128,7 +128,7 @@ sub _read_exact
 	my $buf = '';
 	while (length($buf) < $len)
 	{
-		my $ret = read(STDIN, $buf, length($buf)-$len, length($buf) );
+		my $ret = read(STDIN, $buf, $len - length($buf), length($buf) );
 		if( !defined($ret) )
 		{
 			$out and print $out "sysread: $!\r\n";
